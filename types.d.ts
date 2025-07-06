@@ -1,4 +1,4 @@
-/* import { Models } from "react-native-appwrite";
+import { Models } from "react-native-appwrite";
 
 export interface MenuItem extends Models.Document {
     name: string;
@@ -20,7 +20,7 @@ export interface User extends Models.Document {
     name: string;
     email: string;
     avatar: string;
-}
+} 
 
 export interface CartCustomization {
     id: string;
@@ -47,7 +47,7 @@ export interface CartStore {
     clearCart: () => void;
     getTotalItems: () => number;
     getTotalPrice: () => number;
-} */
+} 
 
 interface TabBarIconProps {
     focused: boolean;

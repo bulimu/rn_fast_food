@@ -1,8 +1,11 @@
+import { Link, router } from "expo-router";
+import { useState } from 'react';
+import { Alert, Text, View } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
-import { Link } from "expo-router";
-import { useState } from 'react';
-import { Text, View, Alert } from 'react-native';
+import { SignInSession } from '@/lib/appwrite';
+
 
 const SignIn = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,20 +22,31 @@ const SignIn = () => {
     }
     setIsSubmitting(true);
 
+    try {
+      await SignInSession({ email, password });
+      router.replace('/');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'An error occurred while signing in.');
+      Sentry.captureEvent(error)
+
+    } finally {
+      setIsSubmitting(false);
+    }
+
   };
 
   return (
     <View className="gap-10 bg-white rounded-lg p-5 mt-5">
       <CustomInput
         placeholder="Enter your email"
-        value={''}
+        value={form.email}
         onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
         label="Email"
         keyboardType="email-address"
       />
       <CustomInput
         placeholder="Enter your password"
-        value={''}
+        value={form.password}
         onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
         label="Password"
         secureTextEntry={true}

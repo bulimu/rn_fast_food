@@ -4,6 +4,7 @@ import { TabBarIconProps } from "@/types";
 import { Image, Text, View } from "react-native";
 import { images } from "@/constants";
 import cn from "clsx";
+import useAuthStore from "@/store/auth.store";
 
 const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
   <View className="tab-icon">
@@ -16,7 +17,7 @@ const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
 
 
 export default function TabLayout() {
-  const isAuthenticated = true;
+  const { isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated) return <Redirect href="/sign_in" />;
 

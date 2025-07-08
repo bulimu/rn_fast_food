@@ -1,13 +1,19 @@
 import { Dimensions, Image, ImageBackground, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 
 import { images } from "@/constants";
-import { Slot } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import cn from "clsx";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import useAuthStore from '@/store/auth.store';
 
 
 export default function Authlayout() {
   const insets = useSafeAreaInsets();
+
+  const { isAuthenticated } = useAuthStore();
+  if (isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
   return (
     <SafeAreaView edges={['bottom']}>
       <KeyboardAvoidingView

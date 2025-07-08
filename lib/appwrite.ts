@@ -13,6 +13,7 @@ export const client = new Client()
 
 client
   .setEndpoint(appwriteConfig.endpoint)
+  // @ts-ignore
   .setProject(appwriteConfig.projectId)
   .setPlatform(appwriteConfig.platform);
 

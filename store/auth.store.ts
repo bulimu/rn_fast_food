@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { User } from '@/types'
 import { getCurrentUser } from '@/lib/appwrite';
+import { User } from '@/types';
+import { create } from 'zustand';
 
 type AuthStore = {
   isAuthenticated: boolean;
@@ -12,6 +12,7 @@ type AuthStore = {
   setLoading: (isLoading: boolean) => void;
 
   fetchAuthenticatedUser: () => Promise<void>;
+  logoutUser: () => void;
 }
 
 const useAuthStore = create<AuthStore>((set) => ({
@@ -22,6 +23,11 @@ const useAuthStore = create<AuthStore>((set) => ({
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
   setUser: (user) => set({ user }),
   setLoading: (isLoading) => set({ isLoading }),
+  
+  logoutUser: () => {
+    set({ user: null, isAuthenticated: false });
+  },
+  
   fetchAuthenticatedUser: async () => {
     set({ isLoading: true });
     try {

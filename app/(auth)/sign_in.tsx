@@ -1,10 +1,11 @@
 import { Link, router } from "expo-router";
 import { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
-import * as Sentry from '@sentry/react-native';
+//import * as Sentry from '@sentry/react-native';
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
 import { SignInSession } from '@/lib/appwrite';
+import useAuthStore from "@/store/auth.store";
 
 
 const SignIn = () => {
@@ -13,6 +14,7 @@ const SignIn = () => {
     email: '',
     password: ''
   });
+  const { fetchAuthenticatedUser } = useAuthStore();
 
   const submit = async () => {
     const { email, password } = form;
@@ -23,16 +25,24 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
+      // Step 1: Sign in and create session
       await SignInSession({ email, password });
-      router.replace('/');
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'An error occurred while signing in.');
-      Sentry.captureEvent(error)
 
+      // Step 2: Update auth store with current user data
+      await fetchAuthenticatedUser();
+
+      // Step 3: Navigate to home after auth store is updated
+      router.replace('/');
+      /* fetchAuthenticatedUser().catch((err) => {
+        console.error('Failed to fetch user after sign-in:', err);
+      }); */
+    } catch (error: any) {
+      console.error("Sign in error:", error);
+      Alert.alert('Error', error.message || 'An error occurred while signing in.');
+      //Sentry.captureEvent(error)
     } finally {
       setIsSubmitting(false);
     }
-
   };
 
   return (

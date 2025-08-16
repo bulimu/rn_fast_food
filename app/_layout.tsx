@@ -1,11 +1,14 @@
+import { ActivityIndicator, View } from 'react-native';
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
-import './globals.css';
-import * as Sentry from '@sentry/react-native';
-import useAuthStore from "@/store/auth.store";
+import { useFocusEffect } from '@react-navigation/native';
+import { Stack } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
+import { useCallback, useEffect } from "react";
 
-Sentry.init({
+import useAuthStore from "@/store/auth.store";
+import './globals.css';
+
+/* Sentry.init({
   dsn: 'https://6263ab8fcc36f3e5ae5d50f1c3007ff6@o4509626913849344.ingest.de.sentry.io/4509626952056912',
 
   // Adds more context data to events (IP address, cookies, user, etc.)
@@ -19,10 +22,12 @@ Sentry.init({
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
-});
+}); */
 
-export default Sentry.wrap(function RootLayout() {
-  SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+
 
   const { isLoading, fetchAuthenticatedUser } = useAuthStore();
 
@@ -38,15 +43,30 @@ export default Sentry.wrap(function RootLayout() {
     if (error) throw error;
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
+  /* 
+    useFocusEffect(
+      useCallback(() => {
+        // 每次应用获得焦点时都会检查认证状态
+        fetchAuthenticatedUser();
+        console.log("Fetching authenticated user...");
+      }, [])
+    ); */
 
   useEffect(() => {
-    fetchAuthenticatedUser()
+    // 在组件加载时获取当前用户
+    fetchAuthenticatedUser();
   }, []);
 
-  if (!fontsLoaded || isLoading) return null;
+  if (!fontsLoaded || isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  };
   //display tabs
   return <Stack screenOptions={{ headerShown: false }} >
-    {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
+    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
   </Stack>;
-});
+};

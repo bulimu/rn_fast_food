@@ -1,7 +1,7 @@
 import { FlatList, Image, Pressable, Text, TouchableOpacity, View, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fragment, useState, useRef } from "react";
-import { Picker } from '@react-native-picker/picker';
+
 
 import cn from 'clsx';
 
@@ -13,7 +13,7 @@ export default function Index() {
 
   const { user } = useAuthStore();
 
-  console.log("User:", JSON.stringify(user, null, 2));
+  //console.log("User:", JSON.stringify(user, null, 2));
 
   return (
     <SafeAreaView className='flex-1 bg-white'>

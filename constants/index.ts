@@ -88,13 +88,7 @@ export const offers = [
         title: "BURRITO DELIGHT",
         image: buritto,
         color: "#EB920C",
-    },
-    {
-        id: 5,
-        title: "BURRITO DELIGHT",
-        image: buritto,
-        color: "#E7750C",
-    },
+    } 
 ];
 
 export const sides = [

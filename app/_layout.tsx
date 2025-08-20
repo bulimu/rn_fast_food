@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { useCallback, useEffect } from "react";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import useAuthStore from "@/store/auth.store";
 import './globals.css';
@@ -53,7 +54,7 @@ export default function RootLayout() {
     ); */
 
   useEffect(() => {
-    // 在组件加载时获取当前用户
+
     fetchAuthenticatedUser();
   }, []);
 
@@ -65,8 +66,12 @@ export default function RootLayout() {
     );
   };
   //display tabs
-  return <Stack screenOptions={{ headerShown: false }} >
-    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-  </Stack>;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }} >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack>
+    </GestureHandlerRootView>
+  );
 };

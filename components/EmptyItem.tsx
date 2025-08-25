@@ -1,8 +1,16 @@
 import { View, Text, Image } from "react-native";
 import React from "react";
 import { images } from "@/constants";
+interface EmptyItemProps {
+  title?: string;
+  description?: string;
+}
 
-const EmptyItem = () => {
+const EmptyItem = ({
+  title = "Nothing matched your search",
+  description = "Try a different search term or check for typos"
+}: EmptyItemProps
+) => {
   return (
     <View className='flex items-center justify-center gap-y-2'>
       <Image
@@ -11,8 +19,8 @@ const EmptyItem = () => {
         resizeMode="contain"
         style={{ alignSelf: "center" }}
       />
-      <Text className=' text-xl font-semibold '>Nothing matched your search</Text>
-      <Text className=' text-lg coloer-[#666] '>Try a different search term or check for typos</Text>
+      <Text className=' text-xl font-semibold '>{title}</Text>
+      <Text className=' text-lg coloer-[#666] '>{description}</Text>
 
     </View>
   );

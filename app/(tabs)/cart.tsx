@@ -6,6 +6,7 @@ import cn from "clsx";
 import CustomButton from "@/components/CustomButton";
 import CartItem from "@/components/CartItem";
 import { PaymentInfoStripeProps } from '@/types';
+import EmptyItem from '@/components/EmptyItem';
 
 
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle, }: PaymentInfoStripeProps) => (
@@ -33,7 +34,7 @@ const Cart = () => {
         keyExtractor={(item) => item._key!}
         contentContainerClassName="pb-28 px-5 pt-5"
         ListHeaderComponent={() => <CustomHeader title="Your Cart" />}
-        ListEmptyComponent={() => <Text>Cart Empty</Text>}
+        ListEmptyComponent={() => <EmptyItem title=' Your cart is empty' description='Browse the menu and add items you love!' />}
         ListFooterComponent={() => totalItems > 0 && (
           <View className="gap-5">
             <View className="mt-6 border border-gray-200 p-5 rounded-2xl">

@@ -14,6 +14,7 @@ import CartButton from "@/components/CartButton";
 
 import Filter from "@/components/Filter";
 import SearchBar from "@/components/SearchBar";
+import EmptyItem from '@/components/EmptyItem';
 
 
 const Search = () => {
@@ -71,7 +72,7 @@ const Search = () => {
             <Filter categories={categories!} />
           </View>
         )}
-        ListEmptyComponent={() => !loading && <Text>No results</Text>}
+        ListEmptyComponent={() => !loading && <EmptyItem />}
       />
 
 

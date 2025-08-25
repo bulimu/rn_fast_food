@@ -12,7 +12,7 @@ export default function Authlayout() {
 
   const { isAuthenticated } = useAuthStore();
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href="/" />;
   }
   return (
     <SafeAreaView edges={['bottom']}>

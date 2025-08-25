@@ -7,7 +7,7 @@ const EmptyItem = () => {
     <View className='flex items-center justify-center gap-y-2'>
       <Image
         source={images.emptyState}
-        className="  w-4/6 mb-2"
+        className="w-4/6 mb-2"
         resizeMode="contain"
         style={{ alignSelf: "center" }}
       />

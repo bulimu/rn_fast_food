@@ -1,12 +1,14 @@
 import CustomButton from '@/components/CustomButton';
+import CustomHeader from '@/components/CustomHeader';
 import CustomizationOption from '@/components/CustomizationOption';
 import QuantitySelector from '@/components/QuantitySelector';
 import { images } from '@/constants';
-import { appwriteConfig, getProductDetail } from '@/lib/appwrite';
-import useAppwrite from '@/lib/useAppwrite';
+import { useProduct } from '@/hooks/useAppwriteQueries';
+import { appwriteConfig } from '@/lib/appwrite';
 import { useCartStore } from '@/store/cart.store';
 import { SelectedCustomization } from '@/types';
 import { PriceCalculator } from '@/utils/PriceCalculator';
+import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -19,8 +21,6 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import CustomHeader from '@/components/CustomHeader';
 
 const ProductDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -30,11 +30,7 @@ const ProductDetailScreen = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedCustomizations, setSelectedCustomizations] = useState<SelectedCustomization[]>([]);
 
-  const { data: product, loading, error } = useAppwrite({
-    fn: getProductDetail,
-    params: { productId: id! },
-    skip: !id
-  });
+  const { data: product, isLoading: loading, error } = useProduct(id!);
 
 
 

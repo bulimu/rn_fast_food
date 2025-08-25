@@ -1,5 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { Alert } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+
+
+interface UseAppwriteQueryOptions<T, P extends Record<string, any>> 
+  extends Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'> {
+  fn: (params: P) => Promise<T>;
+  params?: P;
+  queryKey: (string | number | boolean | null | undefined)[];
+}
+
+export const useAppwriteQuery = <T, P extends Record<string, any>>({
+  fn,
+  params = {} as P,
+  queryKey,
+  enabled = true,
+  ...queryOptions
+}: UseAppwriteQueryOptions<T, P>) => {
+  return useQuery({
+    queryKey: [...queryKey, params],
+    queryFn: () => fn(params),
+    enabled,
+    ...queryOptions,
+  });
+};
+
 
 interface UseAppwriteOption<T, P extends Record<string, string | number>> {
   fn : (params: P) => Promise<T>;

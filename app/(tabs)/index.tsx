@@ -1,19 +1,18 @@
-import { FlatList, Image, Pressable, Text, TouchableOpacity, View, Button } from 'react-native';
+import { Fragment } from "react";
+import { FlatList, Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Fragment, useState, useRef } from "react";
 
-import { router } from 'expo-router';
 import cn from 'clsx';
+import { router } from 'expo-router';
 
-import { images, offers } from "@/constants";
 import CartButton from '@/components/CartButton';
-import useAppwrite from '@/lib/useAppwrite';
-import { getCategories } from '@/lib/appwrite';
+import { images, offers } from "@/constants";
+import { useCategories } from '@/hooks/useAppwriteQueries';
 
 export default function Index() {
 
   //  const { user } = useAuthStore();
-  const { data: categories } = useAppwrite({ fn: getCategories });
+  const { data: categories } = useCategories();
 
   const handleOfferPress = (categoryName: string) => {
     let categoryId: string | undefined = undefined;

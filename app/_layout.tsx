@@ -1,11 +1,12 @@
-import { ActivityIndicator, View } from 'react-native';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from "expo-font";
-import { useFocusEffect } from '@react-navigation/native';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { queryClient } from '@/lib/queryClient';
 import useAuthStore from "@/store/auth.store";
 import './globals.css';
 
@@ -44,17 +45,17 @@ export default function RootLayout() {
     if (error) throw error;
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
-  /* 
-    useFocusEffect(
-      useCallback(() => {
-        // 每次应用获得焦点时都会检查认证状态
-        fetchAuthenticatedUser();
-        console.log("Fetching authenticated user...");
-      }, [])
-    ); */
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     // 每次应用获得焦点时都会检查认证状态
+  //     fetchAuthenticatedUser();
+  //     console.log("Fetching authenticated user...");
+  //   }, [])
+  // );
 
   useEffect(() => {
-
+    console.log("Fetching authenticated user on mount... home");
     fetchAuthenticatedUser();
   }, []);
 
@@ -67,11 +68,13 @@ export default function RootLayout() {
   };
   //display tabs
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }} >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      </Stack>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack screenOptions={{ headerShown: false }} >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 };

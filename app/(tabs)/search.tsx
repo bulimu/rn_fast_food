@@ -1,35 +1,25 @@
-import { getCategories, getMenu } from '@/lib/appwrite';
-import useAppwrite from '@/lib/useAppwrite';
-import { View, Text, Button } from "react-native";
+import { Text, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 //import seed from "@/lib/seed";
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 
-import cn from "clsx";
+import CartButton from "@/components/CartButton";
 import MenuCard from "@/components/MenuCard";
 import { MenuItem } from "@/types";
-import CartButton from "@/components/CartButton";
+import cn from "clsx";
 
+import EmptyItem from '@/components/EmptyItem';
 import Filter from "@/components/Filter";
 import SearchBar from "@/components/SearchBar";
-import EmptyItem from '@/components/EmptyItem';
+import { useCategories, useMenu } from '@/hooks/useAppwriteQueries';
 
 
 const Search = () => {
   const { category, query } = useLocalSearchParams<{ query: string, category: string }>();
 
-  const { data, refetch, loading } = useAppwrite({
-    fn: getMenu,
-    params: { category, query, limit: 6 },
-  });
-
-  const { data: categories } = useAppwrite({ fn: getCategories });
-
-  useEffect(() => {
-    refetch({ category, query, limit: 6 });
-  }, [category, query]);
+  const { data, isLoading: loading } = useMenu(category, query, 6);
+  const { data: categories } = useCategories();
 
   //console.log("Search data:", data);
   return (
@@ -69,7 +59,7 @@ const Search = () => {
 
             <SearchBar />
 
-            <Filter categories={categories!} />
+            <Filter categories={categories as any} />
           </View>
         )}
         ListEmptyComponent={() => !loading && <EmptyItem />}

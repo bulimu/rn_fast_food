@@ -67,6 +67,7 @@ export interface ProductDetail extends MenuItem {
         time: string;
         rating: number;
     };
+    categories: Category[]; // changed from string[] to Category[]
     nutritionInfo: {
         calories: number;
         protein: number;

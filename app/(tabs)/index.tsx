@@ -2,18 +2,33 @@ import { FlatList, Image, Pressable, Text, TouchableOpacity, View, Button } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fragment, useState, useRef } from "react";
 
-
+import { router } from 'expo-router';
 import cn from 'clsx';
 
 import { images, offers } from "@/constants";
 import CartButton from '@/components/CartButton';
-import useAuthStore from "@/store/auth.store";
+import useAppwrite from '@/lib/useAppwrite';
+import { getCategories } from '@/lib/appwrite';
 
 export default function Index() {
 
-  const { user } = useAuthStore();
+  //  const { user } = useAuthStore();
+  const { data: categories } = useAppwrite({ fn: getCategories });
 
-  //console.log("User:", JSON.stringify(user, null, 2));
+  const handleOfferPress = (categoryName: string) => {
+    let categoryId: string | undefined = undefined;
+
+    if (categories && categoryName) {
+      const foundCategory = categories.find(c => c.name === categoryName);
+      if (foundCategory) {
+        categoryId = foundCategory.$id;
+      }
+    }
+    router.push({
+      pathname: '/(tabs)/search',
+      params: { category: categoryId }
+    });
+  };
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -26,6 +41,7 @@ export default function Index() {
             <Pressable className={cn("offer-card", isEven ? 'flex-row-reverse' : 'flex-row')}
               style={{ backgroundColor: item.color }}
               android_ripple={{ color: "#fffff22" }}
+              onPress={() => handleOfferPress(item.Category)}
             >
               {({ pressed }) => (
 

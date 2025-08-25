@@ -146,15 +146,15 @@ export const getCategories = async () => {
 
 export const getProductDetail = async ({ productId }: { productId: string }) => {
   try {
-    // get product basic info
-    const product = await databases.getDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.menuCollectionId,
-      productId
-    );
 
-    // get product customizations
-    const customizations = await getProductCustomizations(productId);
+    const [product, customizations] = await Promise.all([
+      databases.getDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.menuCollectionId,
+        productId
+      ),
+      getProductCustomizations(productId)
+    ]);
 
     // console.log("product categories", product.categories);
     return {
@@ -170,7 +170,7 @@ export const getProductDetail = async ({ productId }: { productId: string }) => 
         calories: product.calories || 365,
         protein: product.protein || 35
       },
-      tags: ['Whole Wheat'] // 可以从产品数据中获取
+      tags: ['Whole Wheat'] 
     };
   } catch (error) {
     console.error('Error fetching product detail:', error);
@@ -185,26 +185,23 @@ export const getProductCustomizations = async (productId: string) => {
       appwriteConfig.databaseId,
       appwriteConfig.menuCustomizationsCollectionId,      
       [Query.equal('menu', productId)]
-    );
+    );  
 
-    const customizations = [];
-    //console.log("menuCustomizations", menuCustomizations.documents);
+    const customizations = menuCustomizations.documents.map((menuCustom) => {
+      const c = menuCustom.customizations;
+      // Request smaller, optimized images for customization options
+      const imageUrl = c.image_url
+        ? `${c.image_url}?project=${appwriteConfig.projectId}&width=112&quality=85`
+        : undefined;
 
-    for (const menuCustom of menuCustomizations.documents) {
-     /*  const customDetail = await databases.getDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.customizationsCollectionId,
-        menuCustom.customizations
-      ); */
-
-      customizations.push({
-        $id: menuCustom.customizations.$id,
-        name: menuCustom.customizations.name,
-        price: menuCustom.customizations.price,
-        type: menuCustom.customizations.type,
-        image_url: `${menuCustom.customizations.image_url}?project=${appwriteConfig.projectId}`
-      });
-    }
+      return {
+        $id: c.$id,
+        name: c.name,
+        price: c.price,
+        type: c.type,
+        image_url: imageUrl,
+      };
+    });
 
     return customizations;
   } catch (error) {

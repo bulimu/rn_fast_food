@@ -36,6 +36,8 @@ const ProductDetailScreen = () => {
     skip: !id
   });
 
+
+
   const productData = product as any;
 
   useEffect(() => {
@@ -124,17 +126,18 @@ const ProductDetailScreen = () => {
   const toppings = productData.customizations?.filter((c: any) => c.type === 'topping') || [];
   const sides = productData.customizations?.filter((c: any) => c.type === 'side') || [];
 
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50 px-5 pt-5">
       {/* top navigation */}
 
       <CustomHeader />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <Text className="h1-bold mb-1">
+        <Text className="h1-bold ">
           {productData.name}
         </Text>
         <View className="flex-row items-center justify-between">
-          <View >
+          <View>
 
             <Text className="text-gray-500 mb-3">{productData.categories}</Text>
             {/* Rating */}
@@ -190,13 +193,10 @@ const ProductDetailScreen = () => {
         </View>
 
         {/*  product info */}
-        <View className="py-3">
-          {/* delivery info */}
-          <View className="flex-row items-center justify-between bg-orange-100 p-4 rounded-xl">
-            <Text className="text-primary font-semibold mr-4">📦 Free Delivery</Text>
-            <Text className="text-gray-600">⏱️ 20-30 mins</Text>
-            <Text className="text-gray-600">⭐ 4.5</Text>
-          </View>
+        <View className="my-3 flex-row items-center justify-between bg-orange-100 p-4 rounded-xl">
+          <Text className="text-primary font-semibold mr-4">📦 Free Delivery</Text>
+          <Text className="text-gray-600">⏱️ 20-30 mins</Text>
+          <Text className="text-gray-600">⭐ 4.5</Text>
         </View>
 
         {/* description */}
@@ -226,7 +226,7 @@ const ProductDetailScreen = () => {
           </TouchableOpacity>
         )}
 
-        {/* Side Options */}
+        {/* Side Options*/}
         {sides.length > 0 && (
           <View className="py-6 mt-2">
             <Text className="h3-bold mb-4">Side options</Text>
@@ -246,18 +246,20 @@ const ProductDetailScreen = () => {
           </View>
         )}
 
+
         <View className="pb-32" />
       </ScrollView>
 
       {/* foot */}
       <View
-        className="bg-white px-2 py-6  rounded-full mb-6 flex-row items-center justify-between gap-x-4"
+        className=" px-2 py-6 rounded-full mb-6 flex-row items-center justify-between gap-x-4"
         style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.18,
-          shadowRadius: 24,
-          elevation: 16, // Android shodow
+          backgroundColor: 'white',
+          shadowColor: '#1a1a1a',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 5
         }}>
 
         <QuantitySelector
@@ -265,12 +267,9 @@ const ProductDetailScreen = () => {
           onIncrease={() => setQuantity(q => q + 1)}
           onDecrease={() => setQuantity(q => Math.max(1, q - 1))}
         />
-
-
         <CustomButton
           title={`Add to cart - ${PriceCalculator.formatPrice(totalPrice)}`}
-          style='shrink '
-
+          style='shrink'
           leftIcon={
             <Image
               source={images.bag}

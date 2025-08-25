@@ -7,6 +7,7 @@ import CustomButton from "@/components/CustomButton";
 import CartItem from "@/components/CartItem";
 import { PaymentInfoStripeProps } from '@/types';
 
+
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle, }: PaymentInfoStripeProps) => (
   <View className="flex-between flex-row my-1">
     <Text className={cn("paragraph-medium text-gray-200", labelStyle)}>
@@ -29,7 +30,7 @@ const Cart = () => {
       <FlatList
         data={items}
         renderItem={({ item }) => <CartItem item={item} />}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._key!}
         contentContainerClassName="pb-28 px-5 pt-5"
         ListHeaderComponent={() => <CustomHeader title="Your Cart" />}
         ListEmptyComponent={() => <Text>Cart Empty</Text>}

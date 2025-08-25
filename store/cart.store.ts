@@ -10,7 +10,23 @@ function areCustomizationsEqual(
     const aSorted = [...a].sort((x, y) => x.id.localeCompare(y.id));
     const bSorted = [...b].sort((x, y) => x.id.localeCompare(y.id));
 
-    return aSorted.every((item, idx) => item.id === bSorted[idx].id);
+   //return aSorted.every((item, idx) => item.id === bSorted[idx].id); 
+   return aSorted.every((item, idx) => {
+        const bItem = bSorted[idx];
+        return item.id === bItem.id && 
+               item.name === bItem.name && 
+               item.price === bItem.price &&
+               item.type === bItem.type;
+    });
+}
+
+function generateCartItemKey(itemId: string, customizations: CartCustomization[] = []): string {
+    const sortedCustomizations = [...customizations]
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map(c => `${c.id}-${c.price}`)
+        .join('|');
+    
+    return `${itemId}::${sortedCustomizations}`;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -36,40 +52,32 @@ export const useCartStore = create<CartStore>((set, get) => ({
             });
         } else {
             set({
-                items: [...get().items, { ...item, quantity: 1, customizations }],
+                items: [...get().items, { ...item, quantity: 1, customizations, _key: generateCartItemKey(item.id, customizations)}],
             });
         }
     },
 
-    removeItem: (id, customizations = []) => {
+    removeItem: (key: string) => {
         set({
-            items: get().items.filter(
-                (i) =>
-                    !(
-                        i.id === id &&
-                        areCustomizationsEqual(i.customizations ?? [], customizations)
-                    )
-            ),
+            items: get().items.filter((i) => i._key !== key),
         });
     },
 
-    increaseQty: (id, customizations = []) => {
+    increaseQty: (key: string) => {
         set({
             items: get().items.map((i) =>
-                i.id === id &&
-                areCustomizationsEqual(i.customizations ?? [], customizations)
+                i._key === key
                     ? { ...i, quantity: i.quantity + 1 }
                     : i
             ),
         });
     },
 
-    decreaseQty: (id, customizations = []) => {
+    decreaseQty: (key: string) => {
         set({
             items: get()
                 .items.map((i) =>
-                    i.id === id &&
-                    areCustomizationsEqual(i.customizations ?? [], customizations)
+                    i._key === key
                         ? { ...i, quantity: i.quantity - 1 }
                         : i
                 )

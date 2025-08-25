@@ -5,14 +5,15 @@ export const appwriteConfig = {
   endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID,
   platform: "host.exp.exponent",
-  databaseId:'68695a47000c4b6c4654',
+ 
+  databaseId:'68a44cc6001c11908d47',
   
-  bucketId:'686cefbe0006208f52ae',
-  userCollectionId:'68695a76001d4519a1e1',
-  categoriesCollectionId:'686ce9a70032f0c1aedd',
-  menuCollectionId:'686cea6a002c093bad65',
-  customizationsCollectionId:'686ced85000f018d7448',
-  menuCustomizationsCollectionId:'686cee8f00153cde35de',
+  bucketId:'68a4578c0015ee41cdac',
+  userCollectionId:'68a44ce600237b07694e',
+  categoriesCollectionId:'68a44dd90020e23ac66e',
+  menuCollectionId:'68a44dc6002fe6b5536a',
+  customizationsCollectionId:'68a44e28003789f1606c',
+  menuCustomizationsCollectionId:'68a44e18000bf042d32e',
 
 }
 
@@ -56,6 +57,7 @@ export const createUser = async ({ name, email, password }: CreateUserPrams) => 
 export const SignInSession = async ({ email, password }: SignInParams) => {
   try {
     const session = await account.createEmailPasswordSession(email, password);
+    //console.log("session", session)
     return session;
   } catch (error: any) {
     const msg = String(error?.message || error);
@@ -111,7 +113,7 @@ export const getMenu = async ({category, query}:GetMenuParams) => {
     const queiries: string[] = [];
 
     if (category) {
-      queiries.push(Query.equal('category', category));
+      queiries.push(Query.equal('categories', category));
     }
     if (query) {
       queiries.push(Query.search('name', query));
@@ -135,9 +137,78 @@ export const getCategories = async () => {
             appwriteConfig.databaseId,
             appwriteConfig.categoriesCollectionId,
         )
-
+       // console.log("categories", categories.documents);
         return categories.documents;
     } catch (e) {
         throw new Error(e as string);
     }
 }
+
+export const getProductDetail = async ({ productId }: { productId: string }) => {
+  try {
+    // get product basic info
+    const product = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.menuCollectionId,
+      productId
+    );
+
+    // get product customizations
+    const customizations = await getProductCustomizations(productId);
+
+    // console.log("product categories", product.categories);
+    return {
+      ...product,
+      customizations,
+      deliveryInfo: {
+        isFree: true,
+        time: '20-30 mins',
+        rating: product.rating || 4.5,
+      },
+      categories: product.categories.name || [],
+      nutritionInfo: {
+        calories: product.calories || 365,
+        protein: product.protein || 35
+      },
+      tags: ['Whole Wheat'] // 可以从产品数据中获取
+    };
+  } catch (error) {
+    console.error('Error fetching product detail:', error);
+    throw new Error(error as string);
+  }
+};
+
+export const getProductCustomizations = async (productId: string) => {
+  try {
+    // get product customizations
+    const menuCustomizations = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.menuCustomizationsCollectionId,      
+      [Query.equal('menu', productId)]
+    );
+
+    const customizations = [];
+    //console.log("menuCustomizations", menuCustomizations.documents);
+
+    for (const menuCustom of menuCustomizations.documents) {
+     /*  const customDetail = await databases.getDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.customizationsCollectionId,
+        menuCustom.customizations
+      ); */
+
+      customizations.push({
+        $id: menuCustom.customizations.$id,
+        name: menuCustom.customizations.name,
+        price: menuCustom.customizations.price,
+        type: menuCustom.customizations.type,
+        image_url: `${menuCustom.customizations.image_url}?project=${appwriteConfig.projectId}`
+      });
+    }
+
+    return customizations;
+  } catch (error) {
+    console.error('Error fetching customizations:', error);
+    return [];
+  }
+};

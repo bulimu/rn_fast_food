@@ -30,6 +30,7 @@ export interface CartCustomization {
 }
 
 export interface CartItemType {
+    _key?: string; // unique key for item + customizations
     id: string; // menu item id
     name: string;
     price: number;
@@ -41,12 +42,44 @@ export interface CartItemType {
 export interface CartStore {
     items: CartItemType[];
     addItem: (item: Omit<CartItemType, "quantity">) => void;
-    removeItem: (id: string, customizations: CartCustomization[]) => void;
+   /*  removeItem: (id: string, customizations: CartCustomization[]) => void;
     increaseQty: (id: string, customizations: CartCustomization[]) => void;
-    decreaseQty: (id: string, customizations: CartCustomization[]) => void;
+    decreaseQty: (id: string, customizations: CartCustomization[]) => void; */
+    removeItem: (key: string) => void;
+    increaseQty: (key: string) => void;
+    decreaseQty: (key: string) => void;
     clearCart: () => void;
     getTotalItems: () => number;
     getTotalPrice: () => number;
+}
+
+export interface ProductCustomization extends Models.Document {
+    name: string;
+    price: number;
+    type: 'topping' | 'side' | 'size';
+    image_url?: string;
+}
+
+export interface ProductDetail extends MenuItem {
+    customizations: ProductCustomization[];
+    deliveryInfo: {
+        isFree: boolean;
+        time: string;
+        rating: number;
+    };
+    nutritionInfo: {
+        calories: number;
+        protein: number;
+    };
+    tags: string[];
+}
+
+export interface SelectedCustomization {
+    id: string;
+    name: string;
+    price: number;
+    type: string;
+    quantity: number;
 } 
 
 interface TabBarIconProps {

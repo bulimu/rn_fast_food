@@ -6,7 +6,7 @@ import { images } from '@/constants';
 import { useProduct } from '@/hooks/useAppwriteQueries';
 import { appwriteConfig } from '@/lib/appwrite';
 import { useCartStore } from '@/store/cart.store';
-import { SelectedCustomization } from '@/types';
+import { CartCustomization } from '@/types';
 import { PriceCalculator } from '@/utils/PriceCalculator';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
@@ -28,7 +28,7 @@ const ProductDetailScreen = () => {
   const navigation = useNavigation();
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedCustomizations, setSelectedCustomizations] = useState<SelectedCustomization[]>([]);
+  const [selectedCustomizations, setSelectedCustomizations] = useState<CartCustomization[]>([]);
 
   const { data: product, isLoading: loading, error } = useProduct(id!);
 
@@ -83,7 +83,8 @@ const ProductDetailScreen = () => {
       id: c.id,
       name: c.name,
       price: c.price,
-      type: c.type
+      type: c.type,
+      quantity: c.quantity || 1
     }));
 
     for (let i = 0; i < quantity; i++) {

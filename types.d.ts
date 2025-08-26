@@ -27,7 +27,7 @@ export interface CartCustomization {
     name: string;
     price: number;
     type: string;
-    quantity: number; // Added quantity property
+    quantity?: number ; // Added quantity property
 }
 
 export interface CartItemType {
@@ -78,14 +78,7 @@ export interface ProductDetail extends MenuItem {
     };
     tags: string[];
 }
-
-export interface SelectedCustomization {
-    id: string;
-    name: string;
-    price: number;
-    type: string;
-    quantity: number;
-} 
+ 
 
 interface TabBarIconProps {
     focused: boolean;

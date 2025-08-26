@@ -16,9 +16,8 @@ const CartItem = ({ item }: { item: CartItemType }) => {
     quantity: custom.quantity || 1, // Ensure quantity exists
   }));
 
-  // Use PriceCalculator to calculate prices
-  const customizationsPrice = PriceCalculator.calculateCustomizationPrice(customizations);
-  const totalItemPrice = PriceCalculator.calculateTotalPrice(item.price, 1, customizations);
+  // Use PriceCalculator to calculate prices 
+  const totalItemPrice = PriceCalculator.calculateTotalPrice(item.price, item.quantity, customizations);
 
   return (
     <View className="cart-item" style={{ elevation: 5, shadowColor: '#878787' }}>
@@ -66,9 +65,9 @@ const CartItem = ({ item }: { item: CartItemType }) => {
 
           <Text className="paragraph-bold text-primary mt-1  ">
             {PriceCalculator.formatPrice(totalItemPrice)}
-            {customizationsPrice > 0 && (
+            {customizations.length > 0 && (
               <Text className="text-gray-500 text-xs">
-                {` (Base: ${PriceCalculator.formatPrice(item.price)})`}
+                {` (Base x1: ${PriceCalculator.formatPrice(item.price)})`}
               </Text>
             )}
           </Text>

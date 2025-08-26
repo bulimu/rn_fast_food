@@ -1,4 +1,5 @@
 import { CartCustomization, CartStore } from "@/types";
+import { PriceCalculator } from "@/utils/PriceCalculator";
 import { create } from "zustand";
 
 function areCustomizationsEqual(
@@ -31,6 +32,7 @@ function generateCartItemKey(itemId: string, customizations: CartCustomization[]
 
 export const useCartStore = create<CartStore>((set, get) => ({
     items: [],
+    selectedItems: [], // Added: Stores the keys of selected items
 
     addItem: (item) => {
         const customizations = item.customizations ?? [];
@@ -51,8 +53,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
                 ),
             });
         } else {
+            const itemKey = generateCartItemKey(item.id, customizations);
             set({
-                items: [...get().items, { ...item, quantity: 1, customizations, _key: generateCartItemKey(item.id, customizations)}],
+                items: [...get().items, { ...item, quantity: 1, customizations, _key: itemKey}],
+                selectedItems: [...get().selectedItems, itemKey], // New items are selected by default
             });
         }
     },
@@ -60,6 +64,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     removeItem: (key: string) => {
         set({
             items: get().items.filter((i) => i._key !== key),
+            selectedItems: get().selectedItems.filter((k) => k !== key), // Also remove selection state
         });
     },
 
@@ -85,19 +90,63 @@ export const useCartStore = create<CartStore>((set, get) => ({
         });
     },
 
-    clearCart: () => set({ items: [] }),
+    clearCart: () => set({ items: [], selectedItems: [] }), 
+
+    // Selection-related methods
+    toggleItemSelection: (key: string) => {
+        const selectedItems = get().selectedItems;
+        const isSelected = selectedItems.includes(key);
+        set({
+            selectedItems: isSelected
+                ? selectedItems.filter((k) => k !== key)
+                : [...selectedItems, key]
+        });
+    },
+
+    selectAllItems: () => {
+        set({
+            selectedItems: get().items.map((item) => item._key || generateCartItemKey(item.id, item.customizations))
+        });
+    },
+
+    deselectAllItems: () => {
+        set({ selectedItems: [] });
+    },
 
     getTotalItems: () =>
         get().items.reduce((total, item) => total + item.quantity, 0),
 
     getTotalPrice: () =>
         get().items.reduce((total, item) => {
-            const base = item.price;
-            const customPrice =
-                item.customizations?.reduce(
-                    (s: number, c: CartCustomization) => s + c.price,
-                    0
-                ) ?? 0;
-            return total + item.quantity * (base + customPrice);
+            // Convert CartCustomization to SelectedCustomization format
+            const customizations = item.customizations?.map(c => ({
+                ...c,
+                quantity: 1 // Default quantity for customizations in the cart is 1
+            })) || [];
+            
+            return total + PriceCalculator.calculateTotalPrice(item.price, item.quantity, customizations);
         }, 0),
+
+    // Selected items calculation methods
+    getSelectedTotalItems: () => {
+        const { items, selectedItems } = get();
+        return items
+            .filter((item) => selectedItems.includes(item._key || generateCartItemKey(item.id, item.customizations)))
+            .reduce((total, item) => total + item.quantity, 0);
+    },
+
+    getSelectedTotalPrice: () => {
+        const { items, selectedItems } = get();
+        return items
+            .filter((item) => selectedItems.includes(item._key || generateCartItemKey(item.id, item.customizations)))
+            .reduce((total, item) => {
+                // Convert CartCustomization to SelectedCustomization format
+                const customizations = item.customizations?.map(c => ({
+                    ...c,
+                    quantity: 1 // Default quantity for customizations in the cart is 1
+                })) || [];
+                
+                return total + PriceCalculator.calculateTotalPrice(item.price, item.quantity, customizations);
+            }, 0);
+    },
 }));

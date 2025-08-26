@@ -29,7 +29,7 @@ const SignIn = () => {
       await SignInSession({ email, password });
 
       // Step 2: Update auth store with current user data
-      //  await fetchAuthenticatedUser();
+      await fetchAuthenticatedUser();
 
       // Step 3: Navigate to home after auth store is updated
       router.replace('/');

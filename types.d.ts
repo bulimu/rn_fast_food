@@ -27,11 +27,12 @@ export interface CartCustomization {
     name: string;
     price: number;
     type: string;
+    quantity: number; // Added quantity property
 }
 
 export interface CartItemType {
-    _key?: string; // unique key for item + customizations
-    id: string; // menu item id
+    _key?: string; // Unique key for item + customizations
+    id: string; // Menu item ID
     name: string;
     price: number;
     image_url: string;
@@ -41,16 +42,19 @@ export interface CartItemType {
 
 export interface CartStore {
     items: CartItemType[];
+    selectedItems: string[]; // Stores the keys of selected items
     addItem: (item: Omit<CartItemType, "quantity">) => void;
-   /*  removeItem: (id: string, customizations: CartCustomization[]) => void;
-    increaseQty: (id: string, customizations: CartCustomization[]) => void;
-    decreaseQty: (id: string, customizations: CartCustomization[]) => void; */
     removeItem: (key: string) => void;
     increaseQty: (key: string) => void;
     decreaseQty: (key: string) => void;
     clearCart: () => void;
+    toggleItemSelection: (key: string) => void; // select/deselect single item
+    selectAllItems: () => void; // all items selected
+    deselectAllItems: () => void; // all items deselected
     getTotalItems: () => number;
     getTotalPrice: () => number;
+    getSelectedTotalItems: () => number; 
+    getSelectedTotalPrice: () => number; 
 }
 
 export interface ProductCustomization extends Models.Document {

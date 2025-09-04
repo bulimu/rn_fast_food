@@ -1,10 +1,11 @@
 import CustomButton from "@/components/CustomButton";
 import { images } from "@/constants";
+import { logoutUser } from '@/lib/appwrite';
 import useAuthStore from "@/store/auth.store";
 import { ProfileFieldProps } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ProfileField = ({ label, value, icon }: ProfileFieldProps) => (
@@ -22,8 +23,8 @@ const ProfileField = ({ label, value, icon }: ProfileFieldProps) => (
 const Profile = () => {
   const { user, setUser, setIsAuthenticated } = useAuthStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Check if user exists before using its properties
   if (!user) {
     return (
       <SafeAreaView className="flex-1 bg-white justify-center items-center">
@@ -36,19 +37,12 @@ const Profile = () => {
     setIsLoggingOut(true);
 
     try {
-      // Import logoutUser function from appwrite.ts
-      const { logoutUser } = await import('@/lib/appwrite');
-
-      // Call logout function
       const { success } = await logoutUser();
 
       if (success) {
-        // Update authentication state
         setUser(null);
         setIsAuthenticated(false);
-
-        // Navigate to sign in
-        router.replace('/sign_in');
+        router.replace('/(auth)/sign_in');
       } else {
         Alert.alert("Error", "Failed to logout. Please try again.");
       }
@@ -65,23 +59,22 @@ const Profile = () => {
       <ScrollView className="flex-1 px-5 pt-5">
         {/* Profile Header */}
         <View className="items-center mb-10">
-          <View className="size-24 rounded-full bg-primary/10 mb-4 items-center justify-center">
-            {user.avatar ? (
-              <Image
-                source={{ uri: user.avatar }}
-                className="size-24 rounded-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <Text className="h1-bold text-primary">{user.name.charAt(0)}</Text>
-            )}
-          </View>
+          <TouchableOpacity
+            onPress={() => setIsModalVisible(true)}
+            className="relative mb-4"
+          >
+            <Image
+              source={user?.avatar ? { uri: user.avatar } : images.avatar}
+              className="w-24 h-24 rounded-full"
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
           <Text className="h2-bold text-dark-100">{user.name}</Text>
           <Text className="paragraph-regular text-gray-500">{user.email}</Text>
         </View>
 
         {/* Profile Fields */}
-        <View className="bg-white rounded-lg p-5 shadow-sm shadow-black/5 mb-8">
+        <View className="bg-white rounded-lg p-5 mb-8" style={{ boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', elevation: 2 }}>
           <Text className="h3-bold text-dark-100 mb-4">Account Information</Text>
 
           <ProfileField
@@ -104,10 +97,13 @@ const Profile = () => {
         </View>
 
         {/* Account Actions */}
-        <View className="bg-white rounded-lg p-5 shadow-sm shadow-black/5 mb-8">
+        <View className="bg-white rounded-lg p-5 mb-8" style={{ boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)' }}>
           <Text className="h3-bold text-dark-100 mb-4">Settings</Text>
 
-          <TouchableOpacity className="profile-field">
+          <TouchableOpacity
+            className="profile-field"
+            onPress={() => router.push('/edit-profile')}
+          >
             <View className="profile-field__icon">
               <Image source={images.pencil} className="size-6" resizeMode="contain" tintColor="#FE8C00" />
             </View>
@@ -116,7 +112,10 @@ const Profile = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity className="profile-field">
+          <TouchableOpacity
+            className="profile-field"
+            onPress={() => router.push('/delivery-addresses')}
+          >
             <View className="profile-field__icon">
               <Image source={images.location} className="size-6" resizeMode="contain" tintColor="#FE8C00" />
             </View>
@@ -151,6 +150,34 @@ const Profile = () => {
           }
         />
       </ScrollView>
+
+      {/* Avatar Modal */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/80 justify-center items-center"
+          activeOpacity={1}
+          onPress={() => setIsModalVisible(false)}
+        >
+          <View className="relative">
+            <Image
+              source={user?.avatar ? { uri: user.avatar } : images.avatar}
+              className="w-80 h-80 rounded-2xl"
+              resizeMode="cover"
+            />
+            <TouchableOpacity
+              className="absolute top-4 right-4 bg-white/20 rounded-full p-2"
+              onPress={() => setIsModalVisible(false)}
+            >
+              <Text className="text-white font-bold text-lg">×</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };

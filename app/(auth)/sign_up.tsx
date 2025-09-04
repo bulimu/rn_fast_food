@@ -22,9 +22,10 @@ const SignUp = () => {
   });
 
   const handleSheetClose = async () => {
+
+    refRBSheet.current?.close();
     await fetchAuthenticatedUser()
     router.replace('/');
-    refRBSheet.current?.close();
 
   };
 

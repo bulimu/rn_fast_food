@@ -1,3 +1,4 @@
+import { StripeProvider } from '@stripe/stripe-react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -57,7 +58,7 @@ export default function RootLayout() {
   useEffect(() => {
     console.log("Fetching authenticated user on mount... home");
     fetchAuthenticatedUser();
-  }, []);
+  }, [fetchAuthenticatedUser]);
 
   if (!fontsLoaded || isLoading) {
     return (
@@ -68,13 +69,18 @@ export default function RootLayout() {
   };
   //display tabs
   return (
-    <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }} >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        </Stack>
-      </GestureHandlerRootView>
-    </QueryClientProvider>
+    <StripeProvider
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''}
+      merchantIdentifier="merchant.com.fastfoodapp"
+    >
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Stack screenOptions={{ headerShown: false }} >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          </Stack>
+        </GestureHandlerRootView>
+      </QueryClientProvider>
+    </StripeProvider>
   );
 };

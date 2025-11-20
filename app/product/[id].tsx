@@ -1,3 +1,4 @@
+import CartButton from '@/components/CartButton';
 import CustomButton from '@/components/CustomButton';
 import CustomHeader from '@/components/CustomHeader';
 import CustomizationOption from '@/components/CustomizationOption';
@@ -127,10 +128,10 @@ const ProductDetailScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-50 px-5 pt-5">
       {/* top navigation */}
+      <CustomHeader rightComponent={<CartButton />} />
 
-      <CustomHeader />
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <Text className="h1-bold ">
+      <ScrollView className="flex-1 px-1" showsVerticalScrollIndicator={false}>
+        <Text className="text-3xl font-bold text-dark-100 mt-2 mb-4">
           {productData.name}
         </Text>
         <View className="flex-row items-center justify-between">

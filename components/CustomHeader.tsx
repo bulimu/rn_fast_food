@@ -5,7 +5,7 @@ import { CustomHeaderProps } from "@/types";
 import { images } from "@/constants";
 import { useNavigation } from '@react-navigation/native';
 
-const CustomHeader = ({ title }: CustomHeaderProps) => {
+const CustomHeader = ({ title, rightComponent }: CustomHeaderProps) => {
   //const router = useRouter();
   const navigation = useNavigation();
 
@@ -20,8 +20,8 @@ const CustomHeader = ({ title }: CustomHeaderProps) => {
       </TouchableOpacity>
 
       {title && <Text className="base-semibold text-dark-100">{title}</Text>}
-      {/* 
-      <Image source={images.search} className="size-5" resizeMode="contain" /> */}
+      
+      {rightComponent ? rightComponent : <View className="size-5" />}
     </View>
   );
 };

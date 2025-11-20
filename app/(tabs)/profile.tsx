@@ -124,7 +124,10 @@ const Profile = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity className="profile-field">
+          <TouchableOpacity
+            className="profile-field"
+            onPress={() => router.push('/order-history')}
+          >
             <View className="profile-field__icon">
               <Image source={images.clock} className="size-6" resizeMode="contain" tintColor="#FE8C00" />
             </View>

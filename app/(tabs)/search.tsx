@@ -65,9 +65,6 @@ const Search = () => {
         ListEmptyComponent={() => !loading && <EmptyItem />}
       />
 
-
-
-
     </SafeAreaView>
   );
 };

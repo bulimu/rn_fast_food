@@ -2,12 +2,15 @@ import CartItem from "@/components/CartItem";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import EmptyItem from '@/components/EmptyItem';
+import PaymentSheet from '@/components/PaymentSheet';
+import { images } from "@/constants";
 import { useCartStore } from "@/store/cart.store";
 import { PaymentInfoStripeProps } from '@/types';
 import cn from "clsx";
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { useRef } from 'react';
+import { Alert, FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import RBSheet from 'react-native-raw-bottom-sheet';
 import { SafeAreaView } from "react-native-safe-area-context";
-
 
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle, }: PaymentInfoStripeProps) => (
   <View className="flex-between flex-row my-1">
@@ -47,6 +50,34 @@ const Cart = () => {
       selectAllItems();
     }
   };
+  const paymentSheetRef = useRef<any>(null);
+
+  const handleOrderNow = () => {
+    if (!hasSelectedItems) {
+      Alert.alert('Tip', 'Please select items to checkout');
+      return;
+    }
+    paymentSheetRef.current?.open();
+  };
+
+  const handlePaymentSuccess = () => {
+    paymentSheetRef.current?.close();
+
+    Alert.alert(
+      'Payment Successful',
+      'Order created! Returning to home',
+      [
+        {
+          text: 'OK',
+          /*  onPress: () => {
+             router.push('/(tabs)/cart');
+           } */
+        }
+      ],
+      { cancelable: false }
+    );
+  };
+
 
   return (
     <SafeAreaView className="bg-white h-full">
@@ -65,7 +96,13 @@ const Cart = () => {
               >
                 <View className={`w-6 h-6 border-2 rounded mr-3 ${allSelected ? 'bg-primary border-primary' : 'border-gray-300'} flex-center`}>
                   {allSelected && (
-                    <Text className="text-white text-xs font-bold">✓</Text>
+                    // <Text className="text-white text-xs font-bold">✓</Text>
+                    <Image
+                      source={images.check}
+                      className="w-3 h-3"
+                      resizeMode="contain"
+                      tintColor="white"
+                    />
                   )}
                 </View>
                 <Text className="base-medium text-dark-100">
@@ -99,7 +136,7 @@ const Cart = () => {
 
               <PaymentInfoStripe
                 label={`Delivery Fee`}
-                value={`$5.00`}
+                value={`$0.00`}
               />
               <PaymentInfoStripe
                 label={`Discount`}
@@ -109,7 +146,7 @@ const Cart = () => {
               <View className="border-t border-gray-300 my-2" />
               <PaymentInfoStripe
                 label={`Total`}
-                value={`$${(selectedTotalPrice + 5 - 0.5).toFixed(2)}`}
+                value={`$${(selectedTotalPrice + 0 - 0.5).toFixed(2)}`}
                 labelStyle="base-bold !text-dark-100"
                 valueStyle="base-bold !text-dark-100 !text-right"
               />
@@ -117,10 +154,33 @@ const Cart = () => {
 
             <CustomButton
               title={`Order Now (${selectedTotalItems} items)`}
+              onPress={handleOrderNow}
             />
           </View>
         )}
       />
+
+      <RBSheet
+        ref={paymentSheetRef}
+        height={500}
+        draggable={true}
+        customStyles={{
+          container: {
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+          },
+          draggableIcon: {
+            backgroundColor: "#000"
+          }
+        }}
+      >
+        <PaymentSheet
+          onSuccess={handlePaymentSuccess}
+          onCancel={() => paymentSheetRef.current?.close()}
+        />
+      </RBSheet>
+
+
     </SafeAreaView>
   )
 }

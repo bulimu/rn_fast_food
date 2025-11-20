@@ -1,0 +1,8 @@
+{
+  "name": "create-payment-intent",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "dependencies": {
+    "stripe": "^14.25.0"
+  }
+}

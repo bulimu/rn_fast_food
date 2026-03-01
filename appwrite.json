@@ -1,0 +1,34 @@
+{
+  "$id": "68a3fa9e00215fb5c158",
+  "name": "food_fast",
+  "functions": [
+    {
+      "$id": "create-payment-intent",
+      "name": "create-payment-intent",
+      "runtime": "node-18.0",
+      "path": "functions/create-payment-intent",
+      "entrypoint": "src/main.js",
+      "execute": ["users"],
+      "events": [],
+      "schedule": "",
+      "timeout": 15,
+      "enabled": true,
+      "logging": true,
+      "scopes": []
+    },
+    {
+      "$id": "upload-avatar",
+      "name": "upload-avatar", 
+      "runtime": "node-18.0",
+      "path": "functions/upload-avatar",
+      "entrypoint": "src/main.js",
+      "execute": ["users"],
+      "events": [],
+      "schedule": "",
+      "timeout": 15,
+      "enabled": true,
+      "logging": true,
+      "scopes": []
+    }
+  ]
+}

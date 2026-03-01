@@ -1,0 +1,1562 @@
+{
+    "projectId": "68a3fa9e00215fb5c158",
+    "endpoint": "https://fra.cloud.appwrite.io/v1",
+    "projectName": "food_fast",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": true,
+            "teams": true,
+            "users": true,
+            "sites": true,
+            "functions": true,
+            "graphql": true,
+            "messaging": true
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": 0,
+                "sessionsLimit": 10,
+                "passwordHistory": 0,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "functions": [
+        {
+            "$id": "upload-avatar-function",
+            "execute": [
+                "users"
+            ],
+            "name": "upload-avatar",
+            "enabled": true,
+            "logging": true,
+            "runtime": "node-18.0",
+            "scopes": [
+                "databases.write",
+                "documents.write",
+                "files.read"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 30,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "specification": "s-0.5vcpu-512mb",
+            "path": "functions/upload-avatar"
+        },
+        {
+            "$id": "69050b89001d7527ff03",
+            "execute": [
+                "users"
+            ],
+            "name": "create-payment-intent",
+            "enabled": true,
+            "logging": true,
+            "runtime": "node-18.0",
+            "scopes": [
+                "users.read"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "specification": "s-0.5vcpu-512mb",
+            "path": "functions/create-payment-intent"
+        }
+    ],
+    "databases": [
+        {
+            "$id": "68a44cc6001c11908d47",
+            "name": "app",
+            "enabled": true
+        }
+    ],
+    "collections": [
+        {
+            "$id": "68a44ce600237b07694e",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "User",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "email",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "format": "email",
+                    "default": null
+                },
+                {
+                    "key": "accountId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "avatar",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "format": "url",
+                    "default": null
+                },
+                {
+                    "key": "phone",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68a44dc6002fe6b5536a",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "menu",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "image_url",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "format": "url",
+                    "default": null
+                },
+                {
+                    "key": "rating",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 5,
+                    "default": null
+                },
+                {
+                    "key": "calories",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "protein",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 1000,
+                    "default": null
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "categories",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44dd90020e23ac66e",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a44f5a0029b483957d",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "menuCustomizations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44e18000bf042d32e",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a44fd000003cf4e501",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "index_1",
+                    "type": "fulltext",
+                    "status": "available",
+                    "attributes": [
+                        "name"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "68a44dd90020e23ac66e",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "categories",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "menu",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44dc6002fe6b5536a",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a4502d0003fba7af90",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68a44e18000bf042d32e",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "menu_customizations",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "menu",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44dc6002fe6b5536a",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a450ea000e7decfe22",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "customizations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44e28003789f1606c",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a45129002a2076bbfc",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68a44e28003789f1606c",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "customizations",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "type",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "topping",
+                        "side",
+                        "size",
+                        "crust",
+                        "bread",
+                        "spice",
+                        "base",
+                        "sauce"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "menuCustomizations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44e18000bf042d32e",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a450bf003bfb70ca4b",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "image_url",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "format": "url",
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68ae79bf0014731b8b31",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "orders",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "order_number",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "pending",
+                        "confirmed",
+                        "preparing",
+                        "ready",
+                        "delivering",
+                        "delivered",
+                        "cancelled"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "payment_status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "unpaid",
+                        "paid",
+                        "failed",
+                        "refunded"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "payment_intent_id",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "total_amount",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 100000,
+                    "default": null
+                },
+                {
+                    "key": "tax_amount",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "min": 0,
+                    "max": 10000,
+                    "default": 0
+                },
+                {
+                    "key": "delivery_fee",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "min": 0,
+                    "max": 1000,
+                    "default": 0
+                },
+                {
+                    "key": "customer_notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "estimated_delivery_time",
+                    "type": "datetime",
+                    "required": false,
+                    "array": false,
+                    "format": "",
+                    "default": null
+                },
+                {
+                    "key": "user_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44ce600237b07694e",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68ae79bf0014731b8b31",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "delivery_address_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68b4e1f2001a3c45d678",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68ae79bf0014731b8b31",
+                    "onDelete": "setNull",
+                    "side": "parent"
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "order_number_index",
+                    "type": "unique",
+                    "status": "available",
+                    "attributes": [
+                        "order_number"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                },
+                {
+                    "key": "status_index",
+                    "type": "key",
+                    "status": "available",
+                    "attributes": [
+                        "status"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "68b4e1f2001a3c45d678",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "addresses",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "title",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "address",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "postalCode",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "isDefault",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "country",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "userId",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44ce600237b07694e",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68b4e1f2001a3c45d678",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "order_items",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "order_items",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "item_name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "item_price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "quantity",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 100,
+                    "default": null
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 100000,
+                    "default": null
+                },
+                {
+                    "key": "order_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68ae79bf0014731b8b31",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_items",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "menu_item_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44dc6002fe6b5536a",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_items",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "order_item_customizations",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "order_item_customizations",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "customization_name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "customization_price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 1000,
+                    "default": null
+                },
+                {
+                    "key": "customization_type",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "topping",
+                        "side",
+                        "size",
+                        "crust",
+                        "bread",
+                        "spice",
+                        "base",
+                        "sauce"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "order_item_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "order_items",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_item_customizations",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "customization_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "68a44e28003789f1606c",
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_item_customizations",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "quantity",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 10,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        }
+    ],
+    "tables": [
+        {
+            "$id": "68a44ce600237b07694e",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "User",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "email",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "format": "email",
+                    "default": null
+                },
+                {
+                    "key": "accountId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "avatar",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "format": "url",
+                    "default": null
+                },
+                {
+                    "key": "phone",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68a44dc6002fe6b5536a",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "menu",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "image_url",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "format": "url",
+                    "default": null
+                },
+                {
+                    "key": "rating",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 5,
+                    "default": null
+                },
+                {
+                    "key": "calories",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "protein",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 1000,
+                    "default": null
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "categories",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a44f5a0029b483957d",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "menuCustomizations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a44fd000003cf4e501",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "index_1",
+                    "type": "fulltext",
+                    "status": "available",
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "68a44dd90020e23ac66e",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "categories",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "menu",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a4502d0003fba7af90",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68a44e18000bf042d32e",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "menu_customizations",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "menu",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a450ea000e7decfe22",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "customizations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a45129002a2076bbfc",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68a44e28003789f1606c",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "customizations",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "type",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "topping",
+                        "side",
+                        "size",
+                        "crust",
+                        "bread",
+                        "spice",
+                        "base",
+                        "sauce"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "menuCustomizations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68a450bf003bfb70ca4b",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "image_url",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "format": "url",
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "68ae79bf0014731b8b31",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "orders",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "order_number",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "pending",
+                        "confirmed",
+                        "preparing",
+                        "ready",
+                        "delivering",
+                        "delivered",
+                        "cancelled"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "payment_status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "unpaid",
+                        "paid",
+                        "failed",
+                        "refunded"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "payment_intent_id",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "total_amount",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 100000,
+                    "default": null
+                },
+                {
+                    "key": "tax_amount",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "min": 0,
+                    "max": 10000,
+                    "default": 0
+                },
+                {
+                    "key": "delivery_fee",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "min": 0,
+                    "max": 1000,
+                    "default": 0
+                },
+                {
+                    "key": "customer_notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "estimated_delivery_time",
+                    "type": "datetime",
+                    "required": false,
+                    "array": false,
+                    "format": "",
+                    "default": null
+                },
+                {
+                    "key": "user_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68ae79bf0014731b8b31",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "delivery_address_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68ae79bf0014731b8b31",
+                    "onDelete": "setNull",
+                    "side": "parent"
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "order_number_index",
+                    "type": "unique",
+                    "status": "available",
+                    "orders": [
+                        "ASC"
+                    ]
+                },
+                {
+                    "key": "status_index",
+                    "type": "key",
+                    "status": "available",
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "68b4e1f2001a3c45d678",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "addresses",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "title",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "address",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "postalCode",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "isDefault",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "country",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "userId",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "68b4e1f2001a3c45d678",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "order_items",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "order_items",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "item_name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "item_price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 10000,
+                    "default": null
+                },
+                {
+                    "key": "quantity",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 100,
+                    "default": null
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 100000,
+                    "default": null
+                },
+                {
+                    "key": "order_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_items",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "menu_item_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_items",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "order_item_customizations",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
+            "databaseId": "68a44cc6001c11908d47",
+            "name": "order_item_customizations",
+            "enabled": true,
+            "columns": [
+                {
+                    "key": "customization_name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "customization_price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 1000,
+                    "default": null
+                },
+                {
+                    "key": "customization_type",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "elements": [
+                        "topping",
+                        "side",
+                        "size",
+                        "crust",
+                        "bread",
+                        "spice",
+                        "base",
+                        "sauce"
+                    ],
+                    "format": "enum",
+                    "default": null
+                },
+                {
+                    "key": "order_item_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_item_customizations",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "customization_id",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relationType": "manyToOne",
+                    "twoWay": false,
+                    "twoWayKey": "order_item_customizations",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "quantity",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 10,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "68a4578c0015ee41cdac",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "fileSecurity": false,
+            "name": "assets",
+            "enabled": true,
+            "maximumFileSize": 5000000000,
+            "allowedFileExtensions": [],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        },
+        {
+            "$id": "68b40451001fb2ece0da",
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")",
+                "read(\"any\")"
+            ],
+            "fileSecurity": false,
+            "name": "avatar",
+            "enabled": true,
+            "maximumFileSize": 5000000000,
+            "allowedFileExtensions": [
+                "jpg",
+                "png"
+            ],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        }
+    ]
+}

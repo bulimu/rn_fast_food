@@ -1,252 +1,258 @@
-import { useCreateOrder, useUpdateOrderStatus } from '@/hooks/useOrderQueries';
-import { functions } from '@/lib/appwrite';
-import useAuthStore from '@/store/auth.store';
-import { useCartStore } from '@/store/cart.store';
-import { PriceCalculator } from '@/utils/PriceCalculator';
-import { useStripe } from '@stripe/stripe-react-native';
-import React, { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
-import CustomButton from './CustomButton';
+import { useCreateOrder, useUpdateOrderStatus } from "@/hooks/useOrderQueries";
+import { functions } from "@/lib/appwrite";
+import useAuthStore from "@/store/auth.store";
+import { useCartStore } from "@/store/cart.store";
+import { CartItemType } from "@/types";
+import { PriceCalculator } from "@/utils/PriceCalculator";
+import { useStripe } from "@stripe/stripe-react-native";
+import React, { useMemo, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
+import CustomButton from "./CustomButton";
 
+// --- Constants ---
+const CLOUD_FUNCTION_ID = "69050b89001d7527ff03";
+
+// --- Types ---
 interface PaymentSheetProps {
+  deliveryFee?: number;
+  discount?: number;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-const PaymentSheet: React.FC<PaymentSheetProps> = ({ onSuccess, onCancel }) => {
+type PaymentStep = "idle" | "creating-order" | "creating-payment" | "processing" | "done";
+
+const STEP_LABELS: Record<PaymentStep, string> = {
+  idle: "",
+  "creating-order": "Creating order...",
+  "creating-payment": "Setting up payment...",
+  processing: "Processing payment...",
+  done: "Payment complete!",
+};
+
+// --- Helper ---
+function calcItemPrice(item: CartItemType): number {
+  const customizations =
+    item.customizations?.map((c) => ({ ...c, quantity: c.quantity || 1 })) || [];
+  return PriceCalculator.calculateTotalPrice(item.price, item.quantity, customizations);
+}
+
+// --- Component ---
+const PaymentSheet: React.FC<PaymentSheetProps> = ({
+  deliveryFee = 0,
+  discount = 0.5,
+  onSuccess,
+  onCancel,
+}) => {
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<PaymentStep>("idle");
+
   const { user } = useAuthStore();
-  const { selectedItems, items, clearCart } = useCartStore();
+  const { getSelectedItems, clearSelectedItems } = useCartStore();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  // Use mutations
   const createOrderMutation = useCreateOrder();
   const updateOrderMutation = useUpdateOrderStatus();
 
-  const selectedCartItems = items.filter(item =>
-    selectedItems.includes(item._key || '')
+  const selectedCartItems = getSelectedItems();
+
+  const subtotal = useMemo(
+    () => selectedCartItems.reduce((sum, item) => sum + calcItemPrice(item), 0),
+    [selectedCartItems]
   );
 
-  const totalAmount = selectedCartItems.reduce((total, item) => {
-    const customizations = item.customizations?.map(c => ({
-      ...c,
-      quantity: 1
-    })) || [];
+  const finalTotal = Math.max(subtotal + deliveryFee - discount, 0);
 
-    return total + PriceCalculator.calculateTotalPrice(item.price, item.quantity, customizations);
-  }, 0);
-
-  const DELIVERY_FEE = 0.00;
-  const DISCOUNT = 0.50;
-  const finalTotal = totalAmount + DELIVERY_FEE - DISCOUNT;
-
+  // --- Payment Flow ---
   const handlePayment = async () => {
     if (!user) {
-      Alert.alert('Error', 'Please sign in first');
+      Alert.alert("Error", "Please sign in first");
+      return;
+    }
+
+    if (selectedCartItems.length === 0) {
+      Alert.alert("Error", "No items selected");
       return;
     }
 
     setLoading(true);
 
     try {
-      console.log('🔄 Step 1: Creating order...');
-
-      // 1. Prepare order data
-      const orderItems = selectedCartItems.map(item => ({
+      // Step 1: Create order in database
+      setStep("creating-order");
+      const orderItems = selectedCartItems.map((item) => ({
         id: item.id,
         name: item.name,
         price: item.price,
         image_url: item.image_url,
         quantity: item.quantity,
-        customizations: item.customizations?.map(c => ({
-          id: c.id,
-          name: c.name,
-          price: c.price,
-          type: c.type,
-          quantity: c.quantity || 1
-        })) || []
+        customizations:
+          item.customizations?.map((c) => ({
+            id: c.id,
+            name: c.name,
+            price: c.price,
+            type: c.type,
+            quantity: c.quantity || 1,
+          })) || [],
       }));
 
       const orderResult = await createOrderMutation.mutateAsync({
         userId: user.$id,
         items: orderItems,
         totalAmount: finalTotal,
-        deliveryAddressId: undefined
+        deliveryAddressId: undefined,
       });
 
       if (!orderResult.success || !orderResult.order) {
-        throw new Error(orderResult.error || 'Failed to create order');
+        throw new Error(orderResult.error || "Failed to create order");
       }
 
       const order = orderResult.order;
-      console.log('✅ Order created:', order.$id);
 
-      // 2. Call cloud function to create PaymentIntent
-      console.log('🔄 Step 2: Creating PaymentIntent...');
+      // Step 2: Create PaymentIntent via cloud function
+      setStep("creating-payment");
       const response = await functions.createExecution(
-        '69050b89001d7527ff03',
+        CLOUD_FUNCTION_ID,
         JSON.stringify({
-          amount: Math.round(finalTotal * 100),
-          currency: 'usd',
+          amount: Math.round(finalTotal * 100), // Stripe expects cents
+          currency: "usd",
           orderId: order.$id,
-          customerEmail: user.email
+          customerEmail: user.email,
         })
       );
 
-      console.log('📦 Function response:', response);
-
-      if (response.status !== 'completed') {
-        throw new Error(`Function execution failed with status: ${response.status}`);
+      if (response.status !== "completed") {
+        throw new Error(`Payment service error (status: ${response.status})`);
       }
 
       const responseData = JSON.parse(response.responseBody);
-      console.log('📦 Response data:', responseData);
-
       const { clientSecret, paymentIntentId, error: paymentError } = responseData;
 
-      if (paymentError) {
-        throw new Error(paymentError);
-      }
+      if (paymentError) throw new Error(paymentError);
+      if (!clientSecret) throw new Error("No client secret received from server");
 
-      if (!clientSecret) {
-        throw new Error('No client secret received from server');
-      }
+      // Step 3: Initialize & Present Stripe Payment Sheet
+      setStep("processing");
 
-      console.log('✅ PaymentIntent created:', paymentIntentId);
-
-      // 3. Initialize Payment Sheet
-      console.log('🔄 Step 3: Initializing Payment Sheet...');
       const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'Fast Food App',
+        merchantDisplayName: "Fast Food App",
         paymentIntentClientSecret: clientSecret,
         defaultBillingDetails: {
           name: user.name,
           email: user.email,
         },
-        returnURL: 'fastfood://payment-complete',
+        returnURL: "fastfood://payment-complete",
       });
 
-      if (initError) {
-        console.error('❌ Init error:', initError);
-        throw new Error(initError.message);
-      }
+      if (initError) throw new Error(initError.message);
 
-      console.log('✅ Payment Sheet initialized');
-
-      // 4. Present Payment Sheet
-      console.log('🔄 Step 4: Presenting Payment Sheet...');
       const { error: presentError } = await presentPaymentSheet();
 
-      console.log('✅ Payment Sheet presented');
-
       if (presentError) {
-        console.log('❌ Present error:', presentError);
-        // User cancelled payment
-        if (presentError.code === 'Canceled') {
-          await updateOrderMutation.mutateAsync({
-            orderId: order.$id,
-            status: 'cancelled',
-            paymentStatus: 'unpaid',
-            paymentIntentId: paymentIntentId
-          });
-          Alert.alert('Payment Cancelled', 'You can complete payment later');
-        } else {
-          // Payment failed
-          await updateOrderMutation.mutateAsync({
-            orderId: order.$id,
-            status: 'cancelled',
-            paymentStatus: 'failed',
-            paymentIntentId: paymentIntentId
-          });
-          Alert.alert('Payment Failed', presentError.message);
-        }
-      } else {
-        // 5. Payment successful
-        console.log('✅ Payment successful');
+        // User cancelled or payment failed
+        const isCancelled = presentError.code === "Canceled";
         await updateOrderMutation.mutateAsync({
           orderId: order.$id,
-          status: 'confirmed',
-          paymentStatus: 'paid',
-          paymentIntentId: paymentIntentId
+          status: "cancelled",
+          paymentStatus: isCancelled ? "unpaid" : "failed",
+          paymentIntentId,
         });
 
-        clearCart();
-
         Alert.alert(
-          'Payment Successful!',
-          `Order #${orderResult.orderNumber}\nYour order has been placed`,
-          [
-            {
-              text: 'OK',
-              onPress: () => onSuccess?.()
-            }
-          ]
+          isCancelled ? "Payment Cancelled" : "Payment Failed",
+          isCancelled ? "You can complete payment later" : presentError.message
         );
+        return;
       }
 
-    } catch (error: any) {
-      console.error('❌ Payment error:', error);
+      // Step 4: Payment successful
+      setStep("done");
+      await updateOrderMutation.mutateAsync({
+        orderId: order.$id,
+        status: "confirmed",
+        paymentStatus: "paid",
+        paymentIntentId,
+      });
 
-      // Provide more detailed error message
-      let errorMessage = 'Please try again';
-      if (error.message) {
-        errorMessage = error.message;
-      }
+      // Only clear the selected items, keep unselected items in cart
+      clearSelectedItems();
 
       Alert.alert(
-        'Payment Error',
-        errorMessage,
-        [
-          {
-            text: 'OK',
-            onPress: () => setLoading(false)
-          }
-        ]
+        "Payment Successful!",
+        `Order #${orderResult.orderNumber}\nYour order has been placed`,
+        [{ text: "OK", onPress: () => onSuccess?.() }]
       );
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      Alert.alert("Payment Error", error.message || "Please try again");
     } finally {
       setLoading(false);
+      setStep("idle");
     }
   };
 
+  // --- Render ---
   return (
-    <View className="p-5 bg-white rounded-t-3xl">
+    <ScrollView className="p-5 bg-white" contentContainerStyle={{ paddingBottom: 30 }}>
       <Text className="text-xl font-bold text-center mb-4">Confirm Payment</Text>
 
+      {/* Order Items */}
       <View className="mb-4">
-        <Text className="text-gray-600 mb-2">Order Summary:</Text>
+        <Text className="text-gray-600 mb-2 font-semibold">Order Summary</Text>
         {selectedCartItems.map((item) => (
-          <View key={item._key} className="flex-row justify-between py-1">
-            <Text className="flex-1">{item.name} x{item.quantity}</Text>
-            <Text className="font-semibold">
-              ${PriceCalculator.calculateTotalPrice(
-                item.price,
-                item.quantity,
-                item.customizations?.map(c => ({ ...c, quantity: 1 })) || []
-              ).toFixed(2)}
+          <View key={item._key} className="flex-row justify-between py-1.5">
+            <View className="flex-1 mr-2">
+              <Text className="text-dark-100" numberOfLines={1}>
+                {item.name} x{item.quantity}
+              </Text>
+              {item.customizations && item.customizations.length > 0 && (
+                <Text className="text-gray-500 text-xs mt-0.5" numberOfLines={1}>
+                  {item.customizations.map((c) => c.name).join(", ")}
+                </Text>
+              )}
+            </View>
+            <Text className="font-semibold text-dark-100">
+              {PriceCalculator.formatPrice(calcItemPrice(item))}
             </Text>
           </View>
         ))}
       </View>
 
+      {/* Price Breakdown */}
       <View className="border-t border-gray-200 pt-4 mb-6">
         <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-600">Subtotal:</Text>
-          <Text className="text-gray-600">${totalAmount.toFixed(2)}</Text>
+          <Text className="text-gray-600">Subtotal</Text>
+          <Text className="text-gray-600">{PriceCalculator.formatPrice(subtotal)}</Text>
         </View>
         <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-600">Delivery Fee:</Text>
-          <Text className="text-gray-600">${DELIVERY_FEE.toFixed(2)}</Text>
+          <Text className="text-gray-600">Delivery Fee</Text>
+          <Text className="text-gray-600">{PriceCalculator.formatPrice(deliveryFee)}</Text>
         </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-600">Discount:</Text>
-          <Text className="text-green-600">-${DISCOUNT.toFixed(2)}</Text>
-        </View>
-        <View className="flex-row justify-between pt-2 border-t border-gray-100">
-          <Text className="text-lg font-bold">Total:</Text>
-          <Text className="text-lg font-bold">${finalTotal.toFixed(2)}</Text>
+        {discount > 0 && (
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-gray-600">Discount</Text>
+            <Text className="text-green-600">-{PriceCalculator.formatPrice(discount)}</Text>
+          </View>
+        )}
+        <View className="border-t border-gray-100 mt-1 pt-3">
+          <View className="flex-row justify-between">
+            <Text className="text-lg font-bold text-dark-100">Total</Text>
+            <Text className="text-lg font-bold text-primary">
+              {PriceCalculator.formatPrice(finalTotal)}
+            </Text>
+          </View>
         </View>
       </View>
 
+      {/* Progress indicator */}
+      {loading && (
+        <View className="flex-row items-center justify-center mb-4 py-2 bg-orange-50 rounded-xl">
+          <ActivityIndicator size="small" color="#FE8C00" />
+          <Text className="ml-2 text-primary font-medium">{STEP_LABELS[step]}</Text>
+        </View>
+      )}
+
+      {/* Action Buttons */}
       <View className="flex-row gap-3">
         <CustomButton
           title="Cancel"
@@ -255,13 +261,13 @@ const PaymentSheet: React.FC<PaymentSheetProps> = ({ onSuccess, onCancel }) => {
           textStyle="text-gray-700"
         />
         <CustomButton
-          title={`Pay $${finalTotal.toFixed(2)}`}
+          title={`Pay ${PriceCalculator.formatPrice(finalTotal)}`}
           onPress={handlePayment}
           style="flex-1"
           isLoading={loading}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

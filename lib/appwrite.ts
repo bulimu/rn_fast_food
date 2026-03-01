@@ -655,16 +655,23 @@ export const updateOrderStatus = async (
   }
 };
 
-export const getUserOrders = async (userId: string) => {
+export const getUserOrders = async (userId: string, cursor?: string) => {
+  const PAGE_SIZE = 10;
   try {
+    const queries = [
+      Query.equal('user_id', userId),
+      Query.orderDesc('$createdAt'),
+      Query.limit(PAGE_SIZE),
+    ];
+
+    if (cursor) {
+      queries.push(Query.cursorAfter(cursor));
+    }
+
     const orders = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.ordersCollectionId,
-      [
-        Query.equal('user_id', userId), // Use snake_case
-        Query.orderDesc('$createdAt'),
-        Query.limit(50)
-      ]
+      queries
     );
 
     // Fetch order items for each order
@@ -696,7 +703,11 @@ export const getUserOrders = async (userId: string) => {
 
     return {
       success: true,
-      orders: ordersWithItems
+      orders: ordersWithItems,
+      hasMore: orders.documents.length === PAGE_SIZE,
+      lastId: orders.documents.length > 0
+        ? orders.documents[orders.documents.length - 1].$id
+        : undefined,
     };
 
   } catch (error) {

@@ -10,8 +10,8 @@ import { useCartStore } from '@/store/cart.store';
 import { CartCustomization } from '@/types';
 import { PriceCalculator } from '@/utils/PriceCalculator';
 import { useNavigation } from '@react-navigation/native';
-import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -25,11 +25,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ProductDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { addItem } = useCartStore();
+  const { addItem, getTotalItems } = useCartStore();
   const navigation = useNavigation();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedCustomizations, setSelectedCustomizations] = useState<CartCustomization[]>([]);
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Toast
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: product, isLoading: loading, error } = useProduct(id!);
 
@@ -43,6 +49,16 @@ const ProductDetailScreen = () => {
       navigation.goBack();
     }
   }, [error, navigation]);
+
+  // --- Toast ---
+  const showToast = (message: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastMessage(message);
+    setToastVisible(true);
+    toastTimer.current = setTimeout(() => {
+      setToastVisible(false);
+    }, 5000);
+  };
 
   const handleCustomizationToggle = (customization: any) => {
     setSelectedCustomizations(prev => {
@@ -78,7 +94,9 @@ const ProductDetailScreen = () => {
   };
 
   const handleAddToCart = () => {
-    if (!productData) return;
+    if (!productData || isAdding) return;
+
+    setIsAdding(true);
 
     const cartCustomizations = selectedCustomizations.map(c => ({
       id: c.id,
@@ -98,7 +116,16 @@ const ProductDetailScreen = () => {
       });
     }
 
-    Alert.alert('Success', 'Item added to cart!');
+    // Show toast
+    const qtyText = quantity > 1 ? `${quantity}x ` : '';
+    showToast(`${qtyText}${productData.name} added to cart`);
+
+    // Reset state for next add
+    setQuantity(1);
+    setSelectedCustomizations([]);
+
+    // Prevent rapid double-tap, re-enable after a short delay
+    setTimeout(() => setIsAdding(false), 500);
   };
 
   const totalPrice = productData
@@ -126,9 +153,90 @@ const ProductDetailScreen = () => {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 px-5 pt-5">
-      {/* top navigation */}
-      <CustomHeader rightComponent={<CartButton />} />
+    <View style={{ flex: 1 }}>
+      {/* Top Toast Banner */}
+      {toastVisible && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            elevation: 9999,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: '#FE8C00',
+              paddingTop: 52,
+              paddingBottom: 16,
+              paddingHorizontal: 20,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
+              shadowColor: '#FE8C00',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.3,
+              shadowRadius: 12,
+              elevation: 10,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 }}>
+                <View style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 17,
+                  backgroundColor: 'rgba(255,255,255,0.25)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 10,
+                }}>
+                  <Image
+                    source={images.bag}
+                    style={{ width: 18, height: 18, tintColor: '#fff' }}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{ color: '#fff', fontSize: 15, fontWeight: '700' }}
+                    numberOfLines={1}
+                  >
+                    Added to Cart!
+                  </Text>
+                  <Text
+                    style={{ color: 'rgba(255,255,255,0.9)', fontSize: 13, marginTop: 2 }}
+                    numberOfLines={1}
+                  >
+                    {toastMessage}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setToastVisible(false);
+                  router.push('/(tabs)/cart');
+                }}
+                style={{
+                  backgroundColor: '#fff',
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 12,
+                }}
+              >
+                <Text style={{ color: '#FE8C00', fontSize: 13, fontWeight: '700' }}>
+                  Cart ({getTotalItems()})
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <SafeAreaView className="flex-1 bg-gray-50 px-5 pt-5">
+        {/* top navigation */}
+        <CustomHeader rightComponent={<CartButton />} />
 
       <ScrollView className="flex-1 px-1" showsVerticalScrollIndicator={false}>
         <Text className="text-3xl font-bold text-dark-100 mt-2 mb-4">
@@ -146,7 +254,7 @@ const ProductDetailScreen = () => {
                   source={images.star}
                   className="w-4 h-4 mr-1"
                   resizeMode="contain"
-                  tintColor={star <= Math.round(productData.rating) ? "text-primary" : '#E5E5E5'}
+                  style={{ tintColor: star <= Math.round(productData.rating) ? '#FE8C00' : '#E5E5E5' }}
                 />
               ))}
               <Text className="ml-2 text-gray-600">
@@ -273,12 +381,14 @@ const ProductDetailScreen = () => {
               source={images.bag}
               className="size-5 mr-2"
               resizeMode="contain"
-              tintColor="#fff"
+              style={{ tintColor: '#fff' }}
             />}
           onPress={handleAddToCart}
         />
       </View>
-    </SafeAreaView >
+
+      </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,19 +1,18 @@
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
-import { Link, router } from "expo-router";
-import { useState, useRef } from 'react';
-import { Text, View, Alert, Image, TouchableOpacity } from 'react-native';
 import { createUser } from "@/lib/appwrite";
+import { Link, router } from "expo-router";
+import { useState } from 'react';
+import { Alert, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 //import SuccessModal from "@/components/SuccessModal";
 import useAuthStore from "@/store/auth.store";
-import RBSheet from 'react-native-raw-bottom-sheet';
 //import SuccessBottomSheet from "@/components/SuccessBottomSheet";
 import { images } from "@/constants";
 
 const SignUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccessSheetOpen, setIsSuccessSheetOpen] = useState(false);
 
-  const refRBSheet = useRef<any>(null);
   const { fetchAuthenticatedUser } = useAuthStore();
   const [form, setForm] = useState({
     name: '',
@@ -22,11 +21,9 @@ const SignUp = () => {
   });
 
   const handleSheetClose = async () => {
-
-    refRBSheet.current?.close();
-    await fetchAuthenticatedUser()
+    setIsSuccessSheetOpen(false);
+    await fetchAuthenticatedUser();
     router.replace('/');
-
   };
 
   const submit = async () => {
@@ -40,8 +37,7 @@ const SignUp = () => {
     try {
       await createUser({ name, email, password });
 
-      //refRBSheet.current?.open();
-      setTimeout(() => refRBSheet.current?.open(), 0);
+      setIsSuccessSheetOpen(true);
 
       //Alert.alert("User created successfully");
       //setShowSuccessModal(true);
@@ -92,24 +88,26 @@ const SignUp = () => {
         </Link>
       </View>
 
-      <RBSheet
-        ref={refRBSheet}
-        //useNativeDriver={true}
-        closeOnPressMask={true}
-        height={400}
-        customStyles={{
-          container: {
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 24,
-          },
-          draggableIcon: {
-            backgroundColor: "#ccc"
-          }
-        }}
+      <Modal
+        visible={isSuccessSheetOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={handleSheetClose}
       >
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }}
+          activeOpacity={1}
+          onPress={handleSheetClose}
+        />
+        <View style={{
+          backgroundColor: 'white',
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          height: 400,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+        }}>
         <Image
           source={images.success}
           style={{ width: 120, height: 120, marginBottom: 20 }}
@@ -135,7 +133,8 @@ const SignUp = () => {
             Go to Homepage
           </Text>
         </TouchableOpacity>
-      </RBSheet>
+        </View>
+      </Modal>
       {/*   <SuccessModal
         visible={showSuccessModal}
         onClose={handleModalClose}
@@ -143,7 +142,7 @@ const SignUp = () => {
         message="Your account has been created and you are now logged in."
         buttonText="Go to Homepage"
       /> */}
-    </View >
+    </View>
   );
 };
 

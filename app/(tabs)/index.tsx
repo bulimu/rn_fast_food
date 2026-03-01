@@ -1,17 +1,17 @@
 import { Fragment } from "react";
-import { FlatList, Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import cn from 'clsx';
 import { router } from 'expo-router';
 
 import CartButton from '@/components/CartButton';
+import DeliveryPicker from '@/components/DeliveryPicker';
 import { images, offers } from "@/constants";
 import { useCategories } from '@/hooks/useAppwriteQueries';
 
 export default function Index() {
 
-  //  const { user } = useAuthStore();
   const { data: categories } = useCategories();
 
   const handleOfferPress = (categoryName: string) => {
@@ -34,7 +34,6 @@ export default function Index() {
 
       <FlatList data={offers}
         renderItem={({ item, index }) => {
-          // Render your item component here
           const isEven = index % 2 === 0;
           return (<View>
             <Pressable className={cn("offer-card", isEven ? 'flex-row-reverse' : 'flex-row')}
@@ -57,7 +56,7 @@ export default function Index() {
                       source={images.arrowRight}
                       className="size-10"
                       resizeMode="contain"
-                      tintColor="#ffffff"
+                      style={{ tintColor: '#ffffff' }}
                     />
                   </View>
 
@@ -72,22 +71,13 @@ export default function Index() {
         ListHeaderComponent={() => (
 
           <View className="flex-between flex-row w-full my-5">
-            <View className="flex-start">
-              <Text className="small-bold text-primary">DELIVER TO</Text>
-              <TouchableOpacity className="flex-center flex-row gap-x-1 mt-0.5">
-
-                <Text className="paragraph-bold text-dark-100">Croatia</Text>
-                <Image source={images.arrowDown} className="size-3" resizeMode="contain" />
-              </TouchableOpacity>
-            </View>
+            <DeliveryPicker />
             <CartButton />
           </View>
-
         )
         }
 
       />
-      {/* Add your modal or other components here */}
     </SafeAreaView >
   );
 }

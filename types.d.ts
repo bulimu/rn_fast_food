@@ -49,13 +49,15 @@ export interface CartStore {
     increaseQty: (key: string) => void;
     decreaseQty: (key: string) => void;
     clearCart: () => void;
-    toggleItemSelection: (key: string) => void; // select/deselect single item
-    selectAllItems: () => void; // all items selected
-    deselectAllItems: () => void; // all items deselected
+    clearSelectedItems: () => void; // Remove only selected items from cart
+    toggleItemSelection: (key: string) => void;
+    selectAllItems: () => void;
+    deselectAllItems: () => void;
     getTotalItems: () => number;
     getTotalPrice: () => number;
-    getSelectedTotalItems: () => number; 
-    getSelectedTotalPrice: () => number; 
+    getSelectedTotalItems: () => number;
+    getSelectedTotalPrice: () => number;
+    getSelectedItems: () => CartItemType[]; // Get the actual selected item objects
 }
 
 export interface ProductCustomization extends Models.Document {

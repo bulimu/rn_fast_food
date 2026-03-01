@@ -31,7 +31,8 @@ const useAuthStore = create<AuthStore>((set) => ({
   fetchAuthenticatedUser: async () => {
     set({ isLoading: true });
     try {
-      const user = await getCurrentUser(); 
+      const user = await getCurrentUser();       
+      
       if(user) set({ user: user as User, isAuthenticated: true })
         else set({ user: null, isAuthenticated: false });
       

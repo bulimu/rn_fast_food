@@ -29,7 +29,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           source={images.minus}
           className="w-4 h-4"
           resizeMode="contain"
-          tintColor={quantity <= minQuantity ? '#ccc' : '#FF9C01'}
+          style={{ tintColor: quantity <= minQuantity ? '#ccc' : '#FF9C01' }}
         />
       </TouchableOpacity>
 
@@ -45,7 +45,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           source={images.plus}
           className="w-4 h-4"
           resizeMode="contain"
-          tintColor="#FF9C01"
+          style={{ tintColor: '#FF9C01' }}
         />
       </TouchableOpacity>
     </View>

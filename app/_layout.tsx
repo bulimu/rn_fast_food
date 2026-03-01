@@ -4,7 +4,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { queryClient } from '@/lib/queryClient';
@@ -62,25 +62,25 @@ export default function RootLayout() {
 
   if (!fontsLoaded || isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <GestureHandlerRootView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
-      </View>
+      </GestureHandlerRootView>
     );
   };
   //display tabs
   return (
-    <StripeProvider
-      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''}
-      merchantIdentifier="merchant.com.fastfoodapp"
-    >
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StripeProvider
+        publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''}
+        merchantIdentifier="merchant.com.fastfoodapp"
+      >
+        <QueryClientProvider client={queryClient}>
           <Stack screenOptions={{ headerShown: false }} >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           </Stack>
-        </GestureHandlerRootView>
-      </QueryClientProvider>
-    </StripeProvider>
+        </QueryClientProvider>
+      </StripeProvider>
+    </GestureHandlerRootView>
   );
 };

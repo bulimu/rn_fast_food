@@ -1,8 +1,7 @@
-import { Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 //import seed from "@/lib/seed";
 import { useLocalSearchParams } from 'expo-router';
-import { FlatList } from 'react-native-gesture-handler';
 
 import CartButton from "@/components/CartButton";
 import MenuCard from "@/components/MenuCard";

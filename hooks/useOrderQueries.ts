@@ -7,19 +7,26 @@ import {
   updateOrderStatus
 } from '@/lib/appwrite';
 import { CreateOrderParams, Order } from '@/types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-// get user orders hook
+// get user orders hook (paginated)
 export const useUserOrders = (userId: string) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['orders', 'user', userId],
-    queryFn: async () => {
-      const result = await getUserOrders(userId);
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+      const result = await getUserOrders(userId, pageParam);
       if (result.success) {
-        return result.orders as unknown as Order[];
+        return {
+          orders: result.orders as unknown as Order[],
+          hasMore: result.hasMore ?? false,
+          lastId: result.lastId as string | undefined,
+        };
       }
       throw new Error(result.error || 'Failed to fetch orders');
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.lastId : undefined,
     enabled: !!userId,
   });
 };
